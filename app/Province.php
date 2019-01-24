@@ -17,4 +17,12 @@ class Province extends Model
     {
         return $this->hasMany('App\City', 'province_id', 'ID');
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function addresses()
+    {
+        return $this->hasMany('App\Address', 'city', 'title');
+    }
 }

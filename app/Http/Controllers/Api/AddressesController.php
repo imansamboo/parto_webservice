@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\City;
+use App\Address;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
-
-use App\Address;
 use Illuminate\Http\Request;
 
 class AddressesController extends Controller
@@ -33,9 +31,9 @@ class AddressesController extends Controller
     public function store(Request $request)
     {
         
-        $city = Address::create($request->all());
+        $address = Address::create($request->all());
 
-        return response()->json($city, 201);
+        return response()->json($address, 201);
     }
 
     /**
@@ -47,9 +45,9 @@ class AddressesController extends Controller
      */
     public function show($id)
     {
-        $city = City::findOrFail($id);
+        $address = Address::findOrFail($id);
 
-        return $city;
+        return $address;
     }
 
     /**
@@ -63,10 +61,10 @@ class AddressesController extends Controller
     public function update(Request $request, $id)
     {
         
-        $city = City::findOrFail($id);
-        $city->update($request->all());
+        $address = Address::findOrFail($id);
+        $address->update($request->all());
 
-        return response()->json($city, 200);
+        return response()->json($address, 200);
     }
 
     /**
@@ -78,7 +76,7 @@ class AddressesController extends Controller
      */
     public function destroy($id)
     {
-        City::destroy($id);
+        Address::destroy($id);
 
         return response()->json(null, 204);
     }

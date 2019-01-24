@@ -17,4 +17,12 @@ class City extends Model
     {
         return $this->belongsTo('App\Province', 'province_id', 'ID');
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function addresses()
+    {
+        return $this->hasMany('App\Address', 'province', 'title');
+    }
 }
