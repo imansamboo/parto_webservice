@@ -9,4 +9,12 @@ class Province extends Model
     public $timestamps = false;
     protected $primaryKey = 'ID';
     protected $fillable = ['title'];
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function cities()
+    {
+        return $this->hasMany('App\City', 'province_id', 'ID');
+    }
 }

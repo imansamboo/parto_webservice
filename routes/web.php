@@ -14,3 +14,13 @@
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/registerCities', function (){
+    $cities = App\City::all();
+    $count = App\City::count();
+   foreach (App\Address::all() as $address){
+       $city = $cities[mt_rand(0, $count - 1)];
+       $address->city = $city->title;
+       $address->province = $city->province->title;
+       $address->save();
+   }
+});
