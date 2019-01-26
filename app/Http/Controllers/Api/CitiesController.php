@@ -22,12 +22,27 @@ class CitiesController extends Controller
         return response()->json($cities, 200);
     }
 
-    public function getProvince(Request $request)
+    /**
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function indexAddresses($id)
+    {
+        $city = City::find($id);
+        $addresses = $city->addresses;
+        return response()->json($addresses, 200);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    /*public function getProvince(Request $request)
     {
         $city = City::find($request->only('id')['id']);
         $province = $city->province;
         return response()->json($province, 200);
-    }
+    }*/
 
     /**
      * Store a newly created resource in storage.

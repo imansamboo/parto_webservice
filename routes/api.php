@@ -22,5 +22,8 @@ Route::resource('addresses', 'Api\\AddressesController', ['except' => ['create',
 Route::resource('provinces', 'Api\\ProvincesController', ['except' => ['create', 'edit']]);
 Route::resource('cities', 'Api\\CitiesController', ['except' => ['create', 'edit']]);
 Route::resource('addresses', 'Api\\AddressesController', ['except' => ['create', 'edit']]);
-Route::post('getCities', 'Api\\ProvincesController@indexCities');
+Route::get('provinces/{id}/getCities', 'Api\\ProvincesController@indexCities');
+Route::get('provinces/{id}/getAddresses', 'Api\\ProvincesController@indexAddresses');
+Route::get('cities/{id}/getAddresses', 'Api\\CitiesController@indexAddresses');
 Route::post('getProvince', 'Api\\CitiesController@getProvince');
+Route::get('addresses/{id}/getProvince', 'Api\\AddressesController@getProvince');

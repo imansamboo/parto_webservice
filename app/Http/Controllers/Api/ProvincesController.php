@@ -26,11 +26,22 @@ class ProvincesController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function indexCities(Request $request)
+    public function indexCities($id)
     {
-        $province = Province::find( $request->only('id')['id']);
+        $province = Province::find($id);
         $cities = $province->cities;
         return response()->json($cities, 200);
+    }
+
+    /**
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function indexAddresses($id)
+    {
+        $province = Province::find($id);
+        $addresses = $province->addresses;
+        return response()->json($addresses, 200);
     }
 
     /**

@@ -22,6 +22,17 @@ class AddressesController extends Controller
     }
 
     /**
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    /*public function getProvince($id)
+    {
+        $address = Address::find($id);
+        $province = $address->province;
+        return response()->json($province, 200);
+    }*/
+
+    /**
      * Store a newly created resource in storage.
      *
      * @param \Illuminate\Http\Request $request
