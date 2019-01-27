@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\ProductMenu;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
-
-use App\Post;
 use Illuminate\Http\Request;
 
-class PostsController extends Controller
+class ProductMenusController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -17,10 +16,21 @@ class PostsController extends Controller
      */
     public function index(Request $request)
     {
-        $posts = Post::latest()->paginate(25);
+        $productMenus = ProductMenu::paginate(12);
 
-        return $posts;
+        return response()->json($productMenus, 200);
     }
+
+    /**
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    /*public function getProvince($id)
+    {
+        $productMenu = ProductMenu::find($id);
+        $province = $productMenu->province;
+        return response()->json($province, 200);
+    }*/
 
     /**
      * Store a newly created resource in storage.
@@ -32,9 +42,9 @@ class PostsController extends Controller
     public function store(Request $request)
     {
         
-        $post = Post::create($request->all());
+        $productMenu = ProductMenu::create($request->all());
 
-        return response()->json($post, 201);
+        return response()->json($productMenu, 201);
     }
 
     /**
@@ -46,9 +56,9 @@ class PostsController extends Controller
      */
     public function show($id)
     {
-        $post = Post::findOrFail($id);
+        $productMenu = ProductMenu::findOrFail($id);
 
-        return $post;
+        return $productMenu;
     }
 
     /**
@@ -62,10 +72,10 @@ class PostsController extends Controller
     public function update(Request $request, $id)
     {
         
-        $post = Post::findOrFail($id);
-        $post->update($request->all());
+        $productMenu = ProductMenu::findOrFail($id);
+        $productMenu->update($request->all());
 
-        return response()->json($post, 200);
+        return response()->json($productMenu, 200);
     }
 
     /**
@@ -77,7 +87,7 @@ class PostsController extends Controller
      */
     public function destroy($id)
     {
-        Post::destroy($id);
+        ProductMenu::destroy($id);
 
         return response()->json(null, 204);
     }

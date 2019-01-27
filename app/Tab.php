@@ -9,4 +9,7 @@ class Tab extends Model
     public $timestamps = false;
     protected $primaryKey = 'ID';
     protected $fillable = ['title'];
+    protected $table = 'tabs';
+
+
 }

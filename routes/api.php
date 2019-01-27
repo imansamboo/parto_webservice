@@ -22,6 +22,14 @@ Route::resource('addresses', 'Api\\AddressesController', ['except' => ['create',
 Route::resource('provinces', 'Api\\ProvincesController', ['except' => ['create', 'edit']]);
 Route::resource('cities', 'Api\\CitiesController', ['except' => ['create', 'edit']]);
 Route::resource('addresses', 'Api\\AddressesController', ['except' => ['create', 'edit']]);
+Route::resource('products', 'Api\\ProductsController', ['except' => ['create', 'edit']]);
+Route::resource('favors', 'Api\\ProductFavorsController', ['except' => ['create', 'edit']]);
+Route::resource('procats', 'Api\\ProductCategoriesController', ['except' => ['create', 'edit']]);
+Route::resource('features', 'Api\\ProductFeaturesController', ['except' => ['create', 'edit']]);
+Route::resource('menus', 'Api\\ProductMenusController', ['except' => ['create', 'edit']]);
+Route::resource('prices', 'Api\\ProductPricesController', ['except' => ['create', 'edit']]);
+Route::resource('slides', 'Api\\ProductSlidesController', ['except' => ['create', 'edit']]);
+Route::resource('tabs', 'Api\\TabsController', ['except' => ['create', 'edit']]);
 Route::get('provinces/{id}/getCities', 'Api\\ProvincesController@indexCities');
 Route::get('provinces/{id}/getAddresses', 'Api\\ProvincesController@indexAddresses');
 Route::get('cities/{id}/getAddresses', 'Api\\CitiesController@indexAddresses');
