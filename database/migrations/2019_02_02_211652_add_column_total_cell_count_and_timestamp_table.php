@@ -14,8 +14,9 @@ class AddColumnTotalCellCountAndTimestampTable extends Migration
     public function up()
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->unsignedInteger('total_cell_count')->nullable();
-            $table->timestamps();
+            $table->unsignedInteger('total_cell_count')->default(0);
+            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
         });
     }
 
