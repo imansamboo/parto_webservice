@@ -24,6 +24,6 @@ class Slide extends Model
      */
     public function banners()
     {
-        return $this->hasMany('App\Banner', 'banner_ID', 'ID');
+        return $this->hasMany('App\Banner', 'slide_ID', 'ID');
     }
 }

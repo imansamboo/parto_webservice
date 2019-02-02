@@ -9,7 +9,7 @@ class Banner extends Model
     public $timestamps = false;
     protected $primaryKey = 'ID';
     protected $fillable = ['slide_ID', 'image', 'large_image', 'target', 'targetID'];
-    protected $table = 'pages';
+    protected $table = 'baners';
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
