@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
 {
-    protected $fillable = ['title', 'target', 'targetID', 'tab_ID'];
+    protected $fillable = ['title', 'target', 'targetID', 'parent_ID'];
     public $timestamps = false;
     protected $primaryKey = 'ID';
     protected $table = 'categories';
@@ -22,8 +22,8 @@ class Category extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function tab()
+    public function parent()
     {
-        return $this->belongsTo('App\Product', 'product_ID', 'ID');
+        return $this->belongsTo('App\ParentCategory', 'parent_ID', 'ID');
     }
 }
