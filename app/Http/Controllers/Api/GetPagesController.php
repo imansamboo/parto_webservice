@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Address;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use App\Page;
 use Illuminate\Http\Request;
 
-class GetCatListController extends Controller
+class GetPagesController extends Controller
 {
     const TARGET = "webview";
     const TARGET_ID = "http://havadaran.org";
-    const SHOW_TAB = true;
     protected $inputs;
     protected $defaultValues;
-    protected $tabs;
+    protected $content;
+
 
     /**
      * GetShopDetailsController constructor.
@@ -24,7 +24,7 @@ class GetCatListController extends Controller
     {
         $this->setInputs($request);
         $this->setDefaultValues();
-        $this->setTabs();
+        $this->setContent();
     }
 
 
@@ -34,7 +34,9 @@ class GetCatListController extends Controller
     public function setInputs($request)
     {
         $this->inputs = $request->only(
-            "token"
+            "token",
+            "ID",
+            "deviceid"
         );
     }
 
@@ -52,16 +54,9 @@ class GetCatListController extends Controller
         );
     }
 
-    public function setTabs()
+    public function setContent()
     {
-        $arrayTabs = array();
-        foreach (App\Tab::all() as $tab){
-            foreach ($tab->categories as $category){
-                $arrayCategories[] = $category->only(['title', 'image', 'target', 'targetID']);
-            }
-            $arrayTabs[] = array_merge($tab->only(['ID', 'title']), ['list' => $arrayCategories]);
-        }
-        $this->tabs = $arrayTabs;
+        $this->content = Page::find($this->getInputs()['ID'])->only(['content','title', 'image']);
     }
 
     /**
@@ -70,6 +65,14 @@ class GetCatListController extends Controller
     public function getInputs()
     {
         return $this->inputs;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getContent()
+    {
+        return $this->content;
     }
 
     /**
@@ -85,20 +88,11 @@ class GetCatListController extends Controller
      */
 
     /**
-     * @return mixed
-     */
-    public function getTabs()
-    {
-        return $this->tabs;
-    }
-
-    /**
      * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
-        $data["section"] = $this->tabs;
-        $data["showTab"] = self::SHOW_TAB;
+        $data["content"] = $this->getContent();
         $dtp["status"]= $this->getDefaultValues()["status"];
         $dtp["message"]= $this->getDefaultValues()["message"];
         $dtp["showDialog"]= $this->getDefaultValues()["showDialog"];
@@ -108,10 +102,10 @@ class GetCatListController extends Controller
         $dtp["canDismiss"]= $this->getDefaultValues()["canDismiss"];
         $dtp["dialogImage"]= $this->getDefaultValues()["dialogImage"];
         $dtp["target"]= self::TARGET;
-        $dtp["targetID"]= self::TARGET_ID;
-        $data["response"]= $dtp;
-        $data["response"]= $dtp;
+        $dtp["targetID"]=self::TARGET_ID;
+        $data["response"]=$dtp;
         return response()->json($data, 200);
     }
+
 
 }

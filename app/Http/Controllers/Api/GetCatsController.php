@@ -7,11 +7,10 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class GetShopDetailsController extends Controller
+class GetCatsController extends Controller
 {
     const TARGET = "webview";
     const TARGET_ID = "http://havadaran.org";
-    const CALL_US = "https://www.partodesign.com/contactus";
     public $inputs;
     public $defaultValues;
     public $mainPageSpecification;
@@ -28,7 +27,6 @@ class GetShopDetailsController extends Controller
     {
         $this->setInputs($request);
         $this->setDefaultValues();
-        $this->setMainPageSpecification();
         $this->setSlide();
         $this->setCats();
         $this->setSections();
@@ -41,13 +39,8 @@ class GetShopDetailsController extends Controller
     public function setInputs($request)
     {
         $this->inputs = $request->only(
-            "version",
-            "os",
-            "osversion",
-            "model",
-            "deviceid",
             "token",
-            "unique_id"
+            "ID"
         );
     }
 
@@ -65,15 +58,10 @@ class GetShopDetailsController extends Controller
         );
     }
 
-    public function setMainPageSpecification()
-    {
-        $this->mainPageSpecification = App\MainPageSpecification::all()[0];
-    }
-
     public function setSlide()
     {
         $arrayBanners = array();
-        $slide = App\Slide::where('title', '=', 'main_page_banner')->first();
+        $slide = App\Slide::where('title', '=', 'get_cat_page')->first();
         foreach ($slide->banners as $slide){
             $arrayBanners[] = $slide->only(['image', 'target', 'targetID']);
         }
@@ -105,14 +93,6 @@ class GetShopDetailsController extends Controller
             ]);
             switch ($section->title) {
                 case "پیشنهاد شگفت انگیز":
-                    foreach(App\Product::where('visibility', '=', 1)->get() as $product){
-                        $arraySections[$i]['list']["image"] = $product->image;
-                        $arraySections[$i]['list']["title"] = $product->title;
-                        $arraySections[$i]['list']["oldprice"] = $product->prices[0]->oldpricetxt;
-                        $arraySections[$i]['list']["price"] = $product->prices[0]->pricetxt;
-                        $arraySections[$i]['list']["target"] = "webview";
-                        $arraySections[$i]['list']["targetID"] = $product->ID;
-                    }
                     break;
                 case "پرفروش ترین ها":
                     foreach(App\Product::where('visibility', '=', 1)->orderBy('total_cell_count', 'desc') as $product){
@@ -185,14 +165,6 @@ class GetShopDetailsController extends Controller
     /**
      * @return mixed
      */
-    public function getMainPageSpecification()
-    {
-        return $this->mainPageSpecification;
-    }
-
-    /**
-     * @return mixed
-     */
     public function getSlide()
     {
         return $this->slide;
@@ -235,7 +207,6 @@ class GetShopDetailsController extends Controller
         $data["slides"]= $this->getSlide();
         $data["cats"]= $this->getCats();
         $data["section"]= $this->getSections();
-        $data["callus"]= self::CALL_US;
         $dtp["status"]= $this->getDefaultValues()["status"];
         $dtp["message"]= $this->getDefaultValues()["message"];
         $dtp["showDialog"]= $this->getDefaultValues()["showDialog"];

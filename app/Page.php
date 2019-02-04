@@ -8,7 +8,7 @@ class Page extends Model
 {
     public $timestamps = false;
     protected $primaryKey = 'ID';
-    protected $fillable = ['title'];
+    protected $fillable = ['title', 'desc', 'image'];
     protected $table = 'pages';
 
     /**

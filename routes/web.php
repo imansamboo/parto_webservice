@@ -20,6 +20,28 @@ function persian($string) {
     return $string;
 }
 Route::get('/', function () {
+    foreach (App\Product::all() as $product){
+        $arrayProducts[] = array_merge(
+            $product->only(
+                [
+                    "image",
+                    "title",
+                    "desc"
+                ]
+            ),
+            $product->prices[0]->only(
+                [
+                    "oldpricetxt",
+                    "pricetxt"
+                ]
+            ),
+            [
+                "target" => "viewproduct",
+                "targetID" => $product->ID
+            ]
+        );
+    }
+    dd($arrayProducts);
     return view('welcome');
 });
 Route::get('/registerCities', function (){

@@ -59,4 +59,12 @@ class Product extends Model
     {
         return $this->belongsToMany('App\Category', 'product_categories', 'product_ID', 'category_ID');
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function tags()
+    {
+        return $this->belongsToMany('App\Tag', 'product_tags', 'product_ID', 'tag_ID');
+    }
 }
