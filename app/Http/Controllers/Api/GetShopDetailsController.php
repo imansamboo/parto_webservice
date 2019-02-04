@@ -9,6 +9,9 @@ use Illuminate\Http\Request;
 
 class GetShopDetailsController extends Controller
 {
+    const TARGET = "webview";
+    const TARGET_ID = "http://havadaran.org";
+    const CALL_US = "https://www.partodesign.com/contactus";
     public $inputs;
     public $defaultValues;
     public $mainPageSpecification;
@@ -87,9 +90,77 @@ class GetShopDetailsController extends Controller
 
     public function setSections()
     {
+        $i = 0;
         $arraySections = array();
         foreach (App\Section::all() as $section){
-            $arraySections[] = $section->only(['image', 'target', 'targetID']);
+            $arraySections[] = $section->only([
+                "title",
+                "type",
+                "more_button_text",
+                "image",
+                "expire_date",
+                "target",
+                "targetID"
+            ]);
+            switch ($section->title) {
+                case "پیشنهاد شگفت انگیز":
+                    foreach(App\Product::where('visibility', '=', 1)->get() as $product){
+                        $arraySections[$i]['list']["image"] = $product->image;
+                        $arraySections[$i]['list']["title"] = $product->title;
+                        $arraySections[$i]['list']["oldprice"] = $product->prices[0]->oldpricetxt;
+                        $arraySections[$i]['list']["price"] = $product->prices[0]->pricetxt;
+                        $arraySections[$i]['list']["target"] = "webview";
+                        $arraySections[$i]['list']["targetID"] = $product->ID;
+                    }
+                    break;
+                case "پرفروش ترین ها":
+                    foreach(App\Product::where('visibility', '=', 1)->orderBy('total_cell_count', 'desc') as $product){
+                        $arraySections[$i]['list']["image"] = $product->image;
+                        $arraySections[$i]['list']["title"] = $product->title;
+                        $arraySections[$i]['list']["oldprice"] = $product->prices[0]->oldpricetxt;
+                        $arraySections[$i]['list']["price"] = $product->prices[0]->pricetxt;
+                        $arraySections[$i]['list']["target"] = "webview";
+                        $arraySections[$i]['list']["targetID"] = $product->ID;
+                    }
+                    break;
+                case "جدید ترین محصولات":
+                    foreach(App\Product::where('visibility', '=', 1)->orderBy('updated_at', 'desc') as $product){
+                        $arraySections[$i]['list']["image"] = $product->image;
+                        $arraySections[$i]['list']["title"] = $product->title;
+                        $arraySections[$i]['list']["oldprice"] = $product->prices[0]->oldpricetxt;
+                        $arraySections[$i]['list']["price"] = $product->prices[0]->pricetxt;
+                        $arraySections[$i]['list']["target"] = "webview";
+                        $arraySections[$i]['list']["targetID"] = $product->ID;
+                    }
+                    break;
+                default:
+                    if($section->type == 'fullbanner'){
+                        $arraySections[$i]['list'] = null;
+                    }elseif ($section->type == 'gridbanner'){
+                        $arraySections[$i]['list'] = array(
+                            array(
+
+                                "image" => "https://api.backino.net/red-apple/gridbanner_left.png",
+                                "title" => "",
+                                "oldprice" => "",
+                                "price" => "",
+                                "target" => "viewproduct",
+                                "targetID" => "153"
+
+                            ),
+                            array(
+
+                                "image" => "https://api.backino.net/red-apple/gridbanner_right.png",
+                                "title" => "",
+                                "oldprice" => "",
+                                "price" => "",
+                                "target" => "viewproduct",
+                                "targetID" => "153"
+
+                            )
+                        );
+                    }
+            }
         }
         $this->sections = $arraySections;
     }
@@ -155,6 +226,27 @@ class GetShopDetailsController extends Controller
         return $string;
     }
 
-
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index()
+    {
+        $data["slides"]= $this->getSlide();
+        $data["cats"]= $this->getCats();
+        $data["section"]= $this->getSections();
+        $data["callus"]= self::CALL_US;
+        $dtp["status"]= $this->getDefaultValues()["status"];
+        $dtp["message"]= $this->getDefaultValues()["message"];
+        $dtp["showDialog"]= $this->getDefaultValues()["showDialog"];
+        $dtp["positiveBtn"]= $this->getDefaultValues()["positiveBtn"];
+        $dtp["positiveBtnUrl"]= $this->getDefaultValues()["positiveBtnUrl"];
+        $dtp["negativeBtn"]= $this->getDefaultValues()["negativeBtn"];
+        $dtp["canDismiss"]= $this->getDefaultValues()["canDismiss"];
+        $dtp["dialogImage"]= $this->getDefaultValues()["dialogImage"];
+        $dtp["target"]= self::TARGET;
+        $dtp["targetID"]=self::TARGET_ID;
+        $data["response"]=$dtp;
+        return response()->json($data, 200);
+    }
 
 }

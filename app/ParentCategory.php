@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ParentCategory extends Model
 {
-    protected $fillable = ['title', 'target', 'targetID', 'tab_ID'];
+    protected $fillable = ['title', 'target', 'targetID', 'tab_ID', 'image'];
     public $timestamps = false;
     protected $primaryKey = 'ID';
     protected $table = 'parent_categories';
