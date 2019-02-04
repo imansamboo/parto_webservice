@@ -79,9 +79,9 @@ class GetCatsController extends Controller
 
     public function setSections()
     {
-        $i = 0;
         $arraySections = array();
         foreach (App\Section::all() as $section){
+            $i = 0;
             $arraySections[] = $section->only([
                 "title",
                 "type",
@@ -103,6 +103,7 @@ class GetCatsController extends Controller
                         $arraySections[$i]['list']["target"] = "webview";
                         $arraySections[$i]['list']["targetID"] = $product->ID;
                     }
+                    $i++;
                     break;
                 case "جدید ترین محصولات":
                     foreach(App\Product::where('visibility', '=', 1)->orderBy('updated_at', 'desc') as $product){
@@ -112,11 +113,13 @@ class GetCatsController extends Controller
                         $arraySections[$i]['list']["price"] = $product->prices[0]->pricetxt;
                         $arraySections[$i]['list']["target"] = "webview";
                         $arraySections[$i]['list']["targetID"] = $product->ID;
+                        $i++;
                     }
                     break;
                 default:
                     if($section->type == 'fullbanner'){
                         $arraySections[$i]['list'] = null;
+                        $i++;
                     }elseif ($section->type == 'gridbanner'){
                         $arraySections[$i]['list'] = array(
                             array(
@@ -140,6 +143,7 @@ class GetCatsController extends Controller
 
                             )
                         );
+                        $i++;
                     }
             }
         }

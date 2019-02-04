@@ -5,20 +5,21 @@ namespace App\Http\Controllers\Api;
 use App\Address;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use App\Product;
+use App\Tag;
 use Illuminate\Http\Request;
 
-class GetShopDetailsController extends Controller
+class GetProductsController extends Controller
 {
     const TARGET = "webview";
     const TARGET_ID = "http://havadaran.org";
-    const CALL_US = "https://www.partodesign.com/contactus";
-    public $inputs;
-    public $defaultValues;
-    public $mainPageSpecification;
-    public $slide;
-    public $cats;
-    public $sections;
-
+    protected $inputs;
+    protected $defaultValues;
+    protected $sections;
+    protected $slides;
+    protected $prices;
+    protected $features;
+    protected $menus;
 
     /**
      * GetShopDetailsController constructor.
@@ -28,9 +29,6 @@ class GetShopDetailsController extends Controller
     {
         $this->setInputs($request);
         $this->setDefaultValues();
-        $this->setMainPageSpecification();
-        $this->setSlide();
-        $this->setCats();
         $this->setSections();
     }
 
@@ -41,13 +39,10 @@ class GetShopDetailsController extends Controller
     public function setInputs($request)
     {
         $this->inputs = $request->only(
-            "version",
-            "os",
-            "osversion",
-            "model",
+            "ID",
             "deviceid",
-            "token",
-            "unique_id"
+            "action",
+            "token"
         );
     }
 
@@ -65,30 +60,6 @@ class GetShopDetailsController extends Controller
         );
     }
 
-    public function setMainPageSpecification()
-    {
-        $this->mainPageSpecification = App\MainPageSpecification::all()[0];
-    }
-
-    public function setSlide()
-    {
-        $arrayBanners = array();
-        $slide = App\Slide::where('title', '=', 'main_page_banner')->first();
-        foreach ($slide->banners as $slide){
-            $arrayBanners[] = $slide->only(['image', 'target', 'targetID']);
-        }
-        $this->slide = $arrayBanners;
-    }
-
-    public function setCats()
-    {
-        $arrayCats = array();
-        foreach (App\ParentCategory::all() as $cat){
-            $arrayCats[] = $cat->only(['image', 'target', 'targetID']);
-        }
-        $this->cats = $arrayCats;
-    }
-
     public function setSections()
     {
         $i = 0;
@@ -104,38 +75,34 @@ class GetShopDetailsController extends Controller
                 "targetID"
             ]);
             switch ($section->title) {
-                case "پیشنهاد شگفت انگیز":
-                    foreach(App\Product::where('visibility', '=', 1)->get() as $product){
-                        $arraySections[$i]['list']["image"] = $product->image;
-                        $arraySections[$i]['list']["title"] = $product->title;
-                        $arraySections[$i]['list']["oldprice"] = $product->prices[0]->oldpricetxt;
-                        $arraySections[$i]['list']["price"] = $product->prices[0]->pricetxt;
-                        $arraySections[$i]['list']["target"] = "webview";
-                        $arraySections[$i]['list']["targetID"] = $product->ID;
+                case "محصولات مرتبط":
+                    foreach(Product::find($this->getInputs()["ID"])->tags as $tag){
+                        foreach ($tag->products as $product){
+                            if($product->visibility == 1){
+                                $arraySections[$i]['list']["image"] = $product->image;
+                                $arraySections[$i]['list']["title"] = $product->title;
+                                $arraySections[$i]['list']["oldprice"] = $product->prices[0]->oldpricetxt;
+                                $arraySections[$i]['list']["price"] = $product->prices[0]->pricetxt;
+                                $arraySections[$i]['list']["target"] = "webview";
+                                $arraySections[$i]['list']["targetID"] = $product->ID;
+                            }
+                        }
                     }
+                    $section[]=array(
+                        "title" => "محصولات مرتبط",
+                        "type" => "section",  //See readme file
+                        "more_button_text" => "",
+                        "image" => "",
+                        "expire_date" => 0,
+                        "target" => "viewcat",
+                        "targetID" => "10",
+                        "list" => array());
+
                     $i++;
                     break;
                 case "پرفروش ترین ها":
-                    foreach(App\Product::where('visibility', '=', 1)->orderBy('total_cell_count', 'desc') as $product){
-                        $arraySections[$i]['list']["image"] = $product->image;
-                        $arraySections[$i]['list']["title"] = $product->title;
-                        $arraySections[$i]['list']["oldprice"] = $product->prices[0]->oldpricetxt;
-                        $arraySections[$i]['list']["price"] = $product->prices[0]->pricetxt;
-                        $arraySections[$i]['list']["target"] = "webview";
-                        $arraySections[$i]['list']["targetID"] = $product->ID;
-                    }
-                    $i++;
                     break;
                 case "جدید ترین محصولات":
-                    foreach(App\Product::where('visibility', '=', 1)->orderBy('updated_at', 'desc') as $product){
-                        $arraySections[$i]['list']["image"] = $product->image;
-                        $arraySections[$i]['list']["title"] = $product->title;
-                        $arraySections[$i]['list']["oldprice"] = $product->prices[0]->oldpricetxt;
-                        $arraySections[$i]['list']["price"] = $product->prices[0]->pricetxt;
-                        $arraySections[$i]['list']["target"] = "webview";
-                        $arraySections[$i]['list']["targetID"] = $product->ID;
-                    }
-                    $i++;
                     break;
                 default:
                     if($section->type == 'fullbanner'){
@@ -171,6 +138,66 @@ class GetShopDetailsController extends Controller
         $this->sections = $arraySections;
     }
 
+    public function setSlides()
+    {
+        foreach (Product::find($this->getInputs()["ID"])->slides as $slide){
+            $arraySlides[] = $slide->only(
+                array(
+                    "image",
+                    "large_image"
+                )
+            );
+        }
+        $this->slides = $arraySlides;
+    }
+
+    public function setPrices()
+    {
+        foreach (Product::find($this->getInputs()["ID"])->prices as $price){
+            $arrayPrices[] = $price->only(
+                array(
+                    "colorID",
+                    "txtcolorcode",
+                    "colortitle",
+                    "colorcode",
+                    "garrantytitle",
+                    "pricetxt",
+                    "price",
+                    "oldpricetxt"
+                )
+            );
+        }
+        $this->prices = $arrayPrices;
+    }
+
+    public function setFeatures()
+    {
+        foreach (Product::find($this->getInputs()["ID"])->features as $feature){
+            $arrayFeatures[] = $feature->only(
+                array(
+                    "key",
+                    "value",
+                )
+            );
+        }
+        $this->features = $arrayFeatures;
+    }
+
+    public function setMenus()
+    {
+        foreach (Product::find($this->getInputs()["ID"])->menus as $menu){
+            $arrayMenus[] = $menu->only(
+                array(
+                    "title",
+                    "target",
+                    "targetID",
+                    "image"
+                )
+            );
+        }
+        $this->menus = $arrayMenus;
+    }
+
     /**
      * @return mixed
      */
@@ -190,46 +217,41 @@ class GetShopDetailsController extends Controller
     /**
      * @return mixed
      */
-    public function getMainPageSpecification()
-    {
-        return $this->mainPageSpecification;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getSlide()
-    {
-        return $this->slide;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getCats()
-    {
-        return $this->cats;
-    }
-
-    /**
-     * @return mixed
-     */
     public function getSections()
     {
         return $this->sections;
     }
 
     /**
-     * @param $string
      * @return mixed
      */
-    public function persian($string) {
-        $persian_num = array('۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹');
-        $latin_num = range(0, 9);
+    public function getSlides()
+    {
+        return $this->slides;
+    }
 
-        $string = str_replace($latin_num, $persian_num, $string);
+    /**
+     * @return mixed
+     */
+    public function getMenus()
+    {
+        return $this->menus;
+    }
 
-        return $string;
+    /**
+     * @return mixed
+     */
+    public function getFeatures()
+    {
+        return $this->features;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPrices()
+    {
+        return $this->price;
     }
 
     /**
@@ -237,10 +259,11 @@ class GetShopDetailsController extends Controller
      */
     public function index()
     {
-        $data["slides"]= $this->getSlide();
-        $data["cats"]= $this->getCats();
-        $data["section"]= $this->getSections();
-        $data["callus"]= self::CALL_US;
+        $data["slides"]=$this->getSlides();
+        $data["price"]=$this->getPrices();
+        $data["section"]=$this->getSections();
+        $data["features"]=$this->getFeatures();
+        $data["menus"]=$this->getMenus();
         $dtp["status"]= $this->getDefaultValues()["status"];
         $dtp["message"]= $this->getDefaultValues()["message"];
         $dtp["showDialog"]= $this->getDefaultValues()["showDialog"];
@@ -254,5 +277,6 @@ class GetShopDetailsController extends Controller
         $data["response"]=$dtp;
         return response()->json($data, 200);
     }
+
 
 }

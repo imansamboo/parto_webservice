@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Tag;
-use App\Product;
+use App\Category;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -12,9 +12,8 @@ class GetProductListsController extends Controller
 {
     const TARGET = "webview";
     const TARGET_ID = "http://havadaran.org";
-    const CALL_US = "https://www.partodesign.com/contactus";
-    public $inputs;
-    public $defaultValues;
+    protected $inputs;
+    protected $defaultValues;
     protected $tags;
     protected $products;
 
@@ -29,6 +28,11 @@ class GetProductListsController extends Controller
         $this->setDefaultValues();
         $this->setDefaultValues();
         $this->setTags();
+        if(isset($this->getInputs()['ID']) && $this->getInputs()['ID'] != "" || $this->getInputs()['ID'] != null){
+            $this->setProductByCat();
+        }else{
+            $this->setProductByTag();
+        }
     }
 
 
@@ -70,10 +74,10 @@ class GetProductListsController extends Controller
         $this->tags = $arrayTags;
     }
 
-    public function setProduct()
+    public function setProductByTag()
     {
         foreach (Tag::where('title', 'LIKE', '%'.$this->getInputs()["q"].'%')->get() as $tag){
-            foreach ($tag->products as $product)
+            foreach ($tag->products as $product){
                 $arrayProducts[] = array_merge(
                     $product->only(
                         [
@@ -93,6 +97,33 @@ class GetProductListsController extends Controller
                         "targetID" => $product->ID
                     ]
                 );
+            }
+        }
+        $this->products = $arrayProducts;
+    }
+
+    public function setProductByCat()
+    {
+        foreach (Category::find($this->getInputs()["ID"])->products as $product){
+            $arrayProducts[] = array_merge(
+                $product->only(
+                    [
+                        "image",
+                        "title",
+                        "desc"
+                    ]
+                ),
+                $product->prices()[0]->only(
+                    [
+                        "oldpricetxt",
+                        "pricetxt"
+                    ]
+                ),
+                [
+                    "target" => "viewproduct",
+                    "targetID" => $product->ID
+                ]
+            );
         }
         $this->products = $arrayProducts;
     }
@@ -150,7 +181,5 @@ class GetProductListsController extends Controller
         $data["response"]=$dtp;
         return response()->json($data, 200);
     }
-
-
 
 }
