@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
-    protected $fillable = ['title', 'readmoreUrl', 'shareTxt', 'showColor', 'desc', 'image', 'total_cell_count', 'visibility'];
+    protected $fillable = ['title', 'readmoreUrl', 'shareTxt', 'showColor', 'desc', 'image', 'total_cell_count', 'visibility', 'maxquantity'];
     public $timestamps = false;
     protected $primaryKey = 'ID';
     protected $table = 'products';
@@ -66,5 +66,13 @@ class Product extends Model
     public function tags()
     {
         return $this->belongsToMany('App\Tag', 'product_tags', 'product_ID', 'tag_ID');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function discountCodes()
+    {
+        return $this->belongsToMany('App\DiscountCode', 'product_discount_codes', 'product_ID', 'discount_code_ID');
     }
 }

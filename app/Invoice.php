@@ -6,7 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class Invoice extends Model
 {
-    protected $fillable = ['id', 'user_id', 'address_id' , 'status', 'sub_total_payment', 'total_payment', 'tax_payment', 'fee'];
+    protected $fillable = [
+        'address_ID',
+        'price',
+        'date',
+        'status',
+        'trackingcode',
+        'user_id'
+    ];
+    public $timestamps = false;
+    protected $primaryKey = 'ID';
+    protected $table = 'invoices';
 
     public static function boot()
     {
@@ -26,19 +36,11 @@ class Invoice extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function details()
-    {
-        return $this->hasMany('App\InvoiceDetail');
-    }
-
-    /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function address()
     {
-        return $this->belongsTo('App\Address');
+        return $this->belongsTo('App\Address', 'address_ID', 'ID');
     }
 
     /**
@@ -46,7 +48,7 @@ class Invoice extends Model
      */
     public function items()
     {
-        return $this->hasMany('App\InvoiceItem');
+        return $this->hasMany('App\InvoiceItem', 'invoice_ID', 'ID');
     }
 
 }

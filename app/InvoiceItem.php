@@ -6,9 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class InvoiceItem extends Model
 {
-    protected $table = 'invoiceItems';
-    protected $fillable = ['user_id', 'product_id','invoice_id', 'quantity', 'taxed', 'price'];
-
+    protected $fillable = [
+        'user_id',
+        'product_ID',
+        'quantity',
+        'is_discounted',
+        'invoice_ID'
+    ];
+    public $timestamps = false;
+    protected $primaryKey = 'ID';
+    protected $table = 'invoice_items';
     public function user()
     {
         return $this->belongsTo('App\User');
@@ -16,11 +23,11 @@ class InvoiceItem extends Model
 
     public function product()
     {
-        return $this->belongsTo('App\Product');
+        return $this->belongsTo('App\Product', 'product_ID');
     }
 
     public function invoice()
     {
-        return $this->belongsTo('App\Invoice');
+        return $this->belongsTo('App\Invoice', 'invoice_ID', 'ID');
     }
 }
