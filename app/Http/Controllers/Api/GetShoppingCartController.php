@@ -86,7 +86,15 @@ class GetShoppingCartController extends Controller
 
     public function setShops()
     {
-        $invoice = Invoice::where('user_id', '=', Auth::user()->id)->where('status', '=', 'درانتظار پرداخت')->firstOrFail();
+        $invoiceCount = Invoice::where('user_id', '=', Auth::user()->id)->where('status', '=', 'درانتظار پرداخت')->count();
+        if($invoiceCount == 0)
+            Invoice::create(
+                array(
+                    'date' => time(),
+                    'user_id' =>Auth::user()->id
+                )
+            );
+        $invoice = Invoice::where('user_id', '=', Auth::user()->id)->where('status', '=', 'درانتظار پرداخت');
         $arrayShops = array();
         foreach ($invoice->items() as $invoice_item){
             $arrayShops[] = array_merge(
@@ -96,6 +104,7 @@ class GetShoppingCartController extends Controller
                 $invoice_item->only(["quantity"])
             );
         }
+        $this->shops = $arrayShops;
     }
 
 
