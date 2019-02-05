@@ -6,6 +6,7 @@ use App\ProductFavor;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProductFavorsController extends Controller
 {
@@ -59,6 +60,50 @@ class ProductFavorsController extends Controller
         $proFav = ProductFavor::findOrFail($id);
 
         return $proFav;
+    }
+
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function isFavored()
+    {
+        $product = ProductFavor::where('product_ID', '=', $_POST["ID"])->where('user_ID', '=', Auth::user()->id)->firstOrFail();
+        $data = ['is_favor' => $product->is_favor];
+        return response()->json($data, 200);
+    }
+
+    /**
+     * @param Request $request
+     */
+    public function examineFavor(Request $request)
+    {
+        $productCount = ProductFavor::where('product_ID', '=', $_POST["ID"])->where('user_ID', '=', Auth::user()->id)->count();
+        if($productCount == 0){
+            return $this->createFavor($request);
+        }elseif($productCount > 0){
+            return $this->updateFavor($request);
+        }
+    }
+    
+    public function updateFavor($request)
+    {
+        $product = ProductFavor::where('product_ID', '=', $request->only(['ID'])['ID'])->where('user_ID', '=', Auth::user()->id)->firstOrFail();
+        $product->isFavor = true;
+        $product->save();
+        return response()->json($product, 200);
+        
+    }
+    
+    public function createFavor($request)
+    {
+        $product = ProductFavor::create(
+            array(
+                'user_id' => Auth::user()->id,
+                'product_ID' => $request->only(['ID'])['ID'],
+                'is_favor' => true
+            )
+        );
+        return response()->json($product, 201);
     }
 
     /**

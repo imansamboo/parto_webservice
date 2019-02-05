@@ -32,7 +32,6 @@ class GetCatsController extends Controller
         $this->setSections();
     }
 
-
     /**
      * @param $request
      */

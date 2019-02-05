@@ -68,6 +68,7 @@ class GetProductListsController extends Controller
 
     public function setTags()
     {
+        $arrayTags = array();
         foreach(Tag::all()as $tag){
             $arrayTags[] = $tag->only(['title', 'ID']);
         }
@@ -76,6 +77,7 @@ class GetProductListsController extends Controller
 
     public function setProductByTag()
     {
+        $arrayProducts = array();
         foreach (Tag::where('title', 'LIKE', '%'.$this->getInputs()["q"].'%')->get() as $tag){
             foreach ($tag->products as $product){
                 $arrayProducts[] = array_merge(
@@ -104,6 +106,7 @@ class GetProductListsController extends Controller
 
     public function setProductByCat()
     {
+        $arrayProducts = array();
         foreach (Category::find($this->getInputs()["ID"])->products as $product){
             $arrayProducts[] = array_merge(
                 $product->only(

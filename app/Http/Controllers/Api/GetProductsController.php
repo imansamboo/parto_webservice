@@ -140,6 +140,7 @@ class GetProductsController extends Controller
 
     public function setSlides()
     {
+        $arraySlides = array();
         foreach (Product::find($this->getInputs()["ID"])->slides as $slide){
             $arraySlides[] = $slide->only(
                 array(
@@ -153,6 +154,7 @@ class GetProductsController extends Controller
 
     public function setPrices()
     {
+        $arrayPrices = array();
         foreach (Product::find($this->getInputs()["ID"])->prices as $price){
             $arrayPrices[] = $price->only(
                 array(
@@ -172,6 +174,7 @@ class GetProductsController extends Controller
 
     public function setFeatures()
     {
+        $arrayFeatures = array();
         foreach (Product::find($this->getInputs()["ID"])->features as $feature){
             $arrayFeatures[] = $feature->only(
                 array(
@@ -185,6 +188,7 @@ class GetProductsController extends Controller
 
     public function setMenus()
     {
+        $arrayMenus = array();
         foreach (Product::find($this->getInputs()["ID"])->menus as $menu){
             $arrayMenus[] = $menu->only(
                 array(
@@ -251,7 +255,7 @@ class GetProductsController extends Controller
      */
     public function getPrices()
     {
-        return $this->price;
+        return $this->prices;
     }
 
     /**
