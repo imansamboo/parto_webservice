@@ -40,6 +40,11 @@ class LoginController extends Controller
         $this->user = new User;
     }
 
+    public function username()
+    {
+        return 'mobile';
+    }
+
     public function login(Request $request)
     {
         // Check validation
@@ -55,8 +60,33 @@ class LoginController extends Controller
             \Session::put('errors', 'Your mobile number not match in our system..!!');
             return back();
         }
+        /*if(\Auth::guard('api')->attempt(['mobile'=> $user->mobile, 'password'=> $request->password], $request->remember)){
+            //return redirect()->intended(route('admin.dashboard'));
+            return response([
+                'data' =>"login successfully"
+            ], 200);
+        }
+
+        //return redirect()->back()->withInput($request->only('mobile','remember'));
+        return response([
+            'data' =>"login failed"
+        ],200);*/
 
         // Set Auth Details
+        if(\Auth::guard('api')->attempt(['mobile'=> $request->mobile, 'password'=> $request->password], $request->remember)){
+            //return redirect()->intended(route('admin.dashboard'));
+            $token = md5(mt_rand(1,99999));
+            $user->token = $token;
+            $user->lastactivity = time();
+            $user->is_logged_out = 0;
+            $user->save();
+            return response()->json(['token' => $token, 'message' => 'Logged in'], 200);
+        }
+
+        //return redirect()->back()->withInput($request->only('mobile','remember'));
+        return response([
+            'data' =>"login failed"
+        ],200);
         \Auth::login($user);
 
         // Redirect home page

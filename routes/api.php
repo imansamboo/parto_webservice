@@ -35,3 +35,5 @@ Route::get('provinces/{id}/getAddresses', 'Api\\ProvincesController@indexAddress
 Route::get('cities/{id}/getAddresses', 'Api\\CitiesController@indexAddresses');
 Route::post('getProvince', 'Api\\CitiesController@getProvince');
 Route::get('addresses/{id}/getProvince', 'Api\\AddressesController@getProvince');
+Route::post('login', 'Auth\\LoginController@login');
+Route::post('provinces', 'Api\\ProvincesController@index');

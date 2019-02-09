@@ -19,8 +19,15 @@ function persian($string) {
 
     return $string;
 }
+
+Route::get('/registerEmail', function () {
+    foreach (\App\User::all() as $user){
+        $user->email = $user->mobile . '@gmail.com';
+        $user->save();
+    }
+});
 Route::get('/', function () {
-    foreach (App\Product::all() as $product){
+    /*foreach (App\Product::all() as $product){
         $arrayProducts[] = array_merge(
             $product->only(
                 [
@@ -41,7 +48,7 @@ Route::get('/', function () {
             ]
         );
     }
-    dd($arrayProducts);
+    dd($arrayProducts);*/
     return view('welcome');
 });
 Route::get('/registerCities', function (){

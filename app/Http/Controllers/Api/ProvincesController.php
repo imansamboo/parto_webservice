@@ -10,6 +10,11 @@ use Illuminate\Http\Request;
 
 class ProvincesController extends Controller
 {
+    public  function __construct()
+    {
+        $this->middleware('check_token');
+    }
+
     /**
      * Display a listing of the resource.
      *
