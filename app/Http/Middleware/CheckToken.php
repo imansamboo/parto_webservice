@@ -22,7 +22,7 @@ class CheckToken
             $user->lastactivity = time();
             $user->is_logged_out = 0;
             $user->save();
-            Auth::login($user, true);
+            \Auth::login($user, true);
             return $next($request);
         }catch (\Exception $exception){
             return response()->json(['message' => 'you should try log in option', 'success' => false], 200);
