@@ -17,10 +17,15 @@ class CheckToken
      */
     public function handle($request, Closure $next)
     {
-        $user = \App\User::where('token', '=', $request->token)->firstOrFail();
-        $user->lastactivity = time();
-        $user->is_logged_out = 0;
-        $user->save();
-        return $next($request);
+        try{
+            $user = \App\User::where('token', '=', $request->token)->firstOrFail();
+            $user->lastactivity = time();
+            $user->is_logged_out = 0;
+            $user->save();
+            Auth::login($user, true);
+            return $next($request);
+        }catch (\Exception $exception){
+            return response()->json(['message' => 'you should try log in option', 'success' => false], 200);
+        }
     }
 }
