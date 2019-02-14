@@ -56,7 +56,7 @@ class GetProductListsController extends Controller
         $this->defaultValues = array(
             "status" => 200,
             "hasnextpage" => true,
-            "errorMessage" => "",
+            "message" => "",
             "showDialog" => false,
             "positiveBtn" => "باشه",
             "positiveBtnUrl" => "",
@@ -107,7 +107,7 @@ class GetProductListsController extends Controller
     public function setProductByCat()
     {
         $arrayProducts = array();
-        foreach (Category::find($this->getInputs()["ID"])->products as $product){
+        foreach (Category::findOrFail($this->getInputs()["ID"])->products as $product){
             $arrayProducts[] = array_merge(
                 $product->only(
                     [
@@ -116,7 +116,7 @@ class GetProductListsController extends Controller
                         "desc"
                     ]
                 ),
-                $product->prices()[0]->only(
+                $product->prices[0]->only(
                     [
                         "oldpricetxt",
                         "pricetxt"

@@ -30,6 +30,10 @@ class GetProductsController extends Controller
         $this->setInputs($request);
         $this->setDefaultValues();
         $this->setSections();
+        $this->setSlides();
+        $this->setFeatures();
+        $this->setPrices();
+        $this->setMenus();
     }
 
 
@@ -50,7 +54,7 @@ class GetProductsController extends Controller
     {
         $this->defaultValues = array(
             "status" => 200,
-            "errorMessage" => "",
+            "message" => "",
             "showDialog" => false,
             "positiveBtn" => "باشه",
             "positiveBtnUrl" => "",
@@ -62,9 +66,10 @@ class GetProductsController extends Controller
 
     public function setSections()
     {
-        $i = 0;
         $arraySections = array();
-        foreach (App\Section::all() as $section){
+        $j = -1;
+        foreach (\App\Section::all() as $section){
+            $j++;
             $arraySections[] = $section->only([
                 "title",
                 "type",
@@ -76,40 +81,28 @@ class GetProductsController extends Controller
             ]);
             switch ($section->title) {
                 case "محصولات مرتبط":
+                    $i = 0;
                     foreach(Product::find($this->getInputs()["ID"])->tags as $tag){
                         foreach ($tag->products as $product){
                             if($product->visibility == 1){
-                                $arraySections[$i]['list']["image"] = $product->image;
-                                $arraySections[$i]['list']["title"] = $product->title;
-                                $arraySections[$i]['list']["oldprice"] = $product->prices[0]->oldpricetxt;
-                                $arraySections[$i]['list']["price"] = $product->prices[0]->pricetxt;
-                                $arraySections[$i]['list']["target"] = "webview";
-                                $arraySections[$i]['list']["targetID"] = $product->ID;
+                                $arraySections[$j]['list'][$i]["image"] = $product->image;
+                                $arraySections[$j]['list'][$i]["title"] = $product->title;
+                                $arraySections[$j]['list'][$i]["oldprice"] = $product->prices[0]->oldpricetxt;
+                                $arraySections[$j]['list'][$i]["price"] = $product->prices[0]->pricetxt;
+                                $arraySections[$j]['list'][$i]["target"] = "webview";
+                                $arraySections[$j]['list'][$i]["targetID"] = $product->ID;
                             }
+                            $i++;
                         }
                     }
-                    $section[]=array(
-                        "title" => "محصولات مرتبط",
-                        "type" => "section",  //See readme file
-                        "more_button_text" => "",
-                        "image" => "",
-                        "expire_date" => 0,
-                        "target" => "viewcat",
-                        "targetID" => "10",
-                        "list" => array());
-
-                    $i++;
-                    break;
-                case "پرفروش ترین ها":
-                    break;
-                case "جدید ترین محصولات":
                     break;
                 default:
-                    if($section->type == 'fullbanner'){
-                        $arraySections[$i]['list'] = null;
-                        $i++;
+                    if( in_array($section->title, ['پیشنهاد شگفت انگیز', 'جدید ترین محصولات', 'پرفروش ترین ها']) ){
+                        unset($arraySections[$j]);
+                    }elseif($section->type == 'fullbanner'){
+                        $arraySections[$j]['list'] = null;
                     }elseif ($section->type == 'gridbanner'){
-                        $arraySections[$i]['list'] = array(
+                        $arraySections[$j]['list'] = array(
                             array(
 
                                 "image" => "https://api.backino.net/red-apple/gridbanner_left.png",
@@ -131,7 +124,6 @@ class GetProductsController extends Controller
 
                             )
                         );
-                        $i++;
                     }
             }
         }

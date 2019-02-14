@@ -8,6 +8,7 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -27,7 +28,6 @@ class GetUserActionsController extends Controller
     {
         $this->setInputs($request);
         $this->setDefaultValues($request);
-        $this->setRouting();
     }
     
     /**
@@ -53,11 +53,11 @@ class GetUserActionsController extends Controller
             );
     }
 
-    public function setDefaultValues()
+    public function setDefaultValues($request)
     {
         $this->defaultValues = array(
-            "status" => 403,
-            "errorMessage" => "",
+            "status" => 200,
+            "message" => "",
             "showDialog" => false,
             "positiveBtn" => "باشه",
             "positiveBtnUrl" => "",
@@ -101,7 +101,7 @@ class GetUserActionsController extends Controller
     /**
      * @return \Illuminate\Http\JsonResponse
      */
-    public function setRouting($request)
+    public function index(Request $request)
     {
         $action = $this->getInputs()['action'];
         switch ($action) {
@@ -136,12 +136,12 @@ class GetUserActionsController extends Controller
      */
     public function register($request)
     {
-        $validatedData = $request->validate([
+        /*$validatedData = $request->validate([
             'fullname' => ['required', 'string', 'max:255'],
             'mobile' => ['required', 'digits:11', 'unique:users'],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
             'gender' => ['required'],
-        ]);
+        ]);*/
         $user = User::create([
             'fullname' => $this->getInputs()['fullname'],
             'mobile' => $this->getInputs()['mobile'],
@@ -159,6 +159,7 @@ class GetUserActionsController extends Controller
         $dtp["target"]= self::TARGET;
         $dtp["targetID"]=self::TARGET_ID;
         $data['user'] = $user;
+        $data['token'] = null;
         $data["response"]=$dtp;
         return response()->json($data, 200);
     }
@@ -169,11 +170,12 @@ class GetUserActionsController extends Controller
      */
     public function login($request)
     {
-        $request->validate(
+        /*$request->validate(
             [
                 'mobile' => ['required', 'digits:11', 'unique:users'],
             ]
         );
+        dd(12);*/
         $user = User::where('mobile', $request->get('mobile'))->first();
         if($request->get('mobile') != $user->mobile || !$user->is_sms_verified) {
             \Session::put('errors', 'Your mobile number not match in our system..!!');
@@ -197,7 +199,7 @@ class GetUserActionsController extends Controller
             $dtp["negativeBtn"]= $this->getDefaultValues()["negativeBtn"];
             $dtp["canDismiss"]= $this->getDefaultValues()["canDismiss"];
             $dtp["dialogImage"]= $this->getDefaultValues()["dialogImage"];
-            $dtp["target"]= self::TARGET;
+            $dtp["target"]= "finishActivity";
             $dtp["targetID"]= self::TARGET_ID;
             $data["response"]= $dtp;
             \Auth::login($user);
@@ -211,20 +213,20 @@ class GetUserActionsController extends Controller
      */
     public function forgetPass($request)
     {
-        $request->validate(
+        /*$request->validate(
             [
                 'mobile' => ['required', 'digits:11'],
             ]
-        );
+        );*/
         $user = User::where('mobile', '=', $this->getInputs()['mobile'])->firstOrFail();
         $user->last_fpass = 123456;
         $user->is_fpass_enabled = true;
-        $token = md5(mt_rand(1,99999));
-        $user->token = $token;
+        //$token = md5(mt_rand(1,99999));
+        $user->token = null;
         $user->save();
         $data["user"] = $user;
-        $data["token"] = $token;
-        $dtp["status"]= 200;
+        $data["token"] = null;
+        $dtp["status"]= 403;
         $dtp["message"]= $this->getDefaultValues()["message"];
         $dtp["showDialog"]= $this->getDefaultValues()["showDialog"];
         $dtp["positiveBtn"]= $this->getDefaultValues()["positiveBtn"];
@@ -235,7 +237,7 @@ class GetUserActionsController extends Controller
         $dtp["target"]= self::TARGET;
         $dtp["targetID"]= self::TARGET_ID;
         $data["response"]= $dtp;
-        return response()->json($data, 200);
+        return response()->json($data, 403);
 
     }
 
@@ -245,33 +247,34 @@ class GetUserActionsController extends Controller
      */
     public function resetPass($request)
     {
-        $request->validate(
+        /*$request->validate(
             [
                 'last_fpass' => ['required', 'digits:6'],
                 'token' => ['required'],
                 'password' => ['required', 'string', 'min:6'],
             ]
-        );
-        $user = User::where('token', '=', $this->getInputs()['token'])->firstOrFail();
-        if($user->is_fpass_enabled && $user->last_fpass == $request->last_fpass){
-            $user->password = Hash::make($this->getInputs()['password']);
-            $user->is_fpass_enabled = false;
-            $user->token = 0;
-            $user->save();
-            $data["user"] = $user;
-            $dtp["status"]= 200;
-            $dtp["message"]= $this->getDefaultValues()["message"];
-            $dtp["showDialog"]= $this->getDefaultValues()["showDialog"];
-            $dtp["positiveBtn"]= $this->getDefaultValues()["positiveBtn"];
-            $dtp["positiveBtnUrl"]= $this->getDefaultValues()["positiveBtnUrl"];
-            $dtp["negativeBtn"]= $this->getDefaultValues()["negativeBtn"];
-            $dtp["canDismiss"]= $this->getDefaultValues()["canDismiss"];
-            $dtp["dialogImage"]= $this->getDefaultValues()["dialogImage"];
-            $dtp["target"]= self::TARGET;
-            $dtp["targetID"]= self::TARGET_ID;
-            $data["response"]= $dtp;
-            return response()->json($data, 200);
-        }
+        );*/
+        $user = User::where('mobile', '=', $this->getInputs()['mobile'])->where('last_fpass', '=', $this->getInputs()['activecode'])->where('is_fpass_enabled', '=', 1)->firstOrFail();
+        $user->password = Hash::make($this->getInputs()['passcode']);
+        $user->is_fpass_enabled = false;
+        $user->is_confirm_sms_enabled = false;
+        $user->token = 0;
+        $user->is_logged_out = true;
+        $user->save();
+        $data["user"] = $user;
+        $data["token"] = null;
+        $dtp["status"]= 200;
+        $dtp["message"]= $this->getDefaultValues()["message"];
+        $dtp["showDialog"]= $this->getDefaultValues()["showDialog"];
+        $dtp["positiveBtn"]= $this->getDefaultValues()["positiveBtn"];
+        $dtp["positiveBtnUrl"]= $this->getDefaultValues()["positiveBtnUrl"];
+        $dtp["negativeBtn"]= $this->getDefaultValues()["negativeBtn"];
+        $dtp["canDismiss"]= $this->getDefaultValues()["canDismiss"];
+        $dtp["dialogImage"]= $this->getDefaultValues()["dialogImage"];
+        $dtp["target"]= 'gotoLoginPage';
+        $dtp["targetID"]= '';
+        $data["response"]= $dtp;
+        return response()->json($data, 200);
     }
 
     /**
@@ -280,19 +283,19 @@ class GetUserActionsController extends Controller
      */
     public function activateUser($request)
     {
-        $request->validate(
+        /*$request->validate(
             [
                 'last_sent_code' => ['required', 'digits:6'],
                 'token' => ['required'],
             ]
-        );
-        $user = User::where('token', '=', $this->getInputs()['token'])->firstOrFail();
+        );*/
+        $user = User::where('last_sent_code', '=', $this->getInputs()['activecode'])->where('is_confirm_sms_enabled', '=', 1)->firstOrFail();
         $user->token = 0;
         $user->is_sms_verified = true;
         $user->is_confirm_sms_enabled = false;
         $user->save();
         $data["user"] = $user;
-        $dtp["status"]= 200;
+        $dtp["status"]= 403;
         $dtp["message"]= $this->getDefaultValues()["message"];
         $dtp["showDialog"]= $this->getDefaultValues()["showDialog"];
         $dtp["positiveBtn"]= $this->getDefaultValues()["positiveBtn"];
@@ -312,16 +315,18 @@ class GetUserActionsController extends Controller
      */
     public function resendSMS($request)
     {
-        $request->validate(
+        /*$request->validate(
             [
                 'mobile' => ['required', 'digits:11'],
             ]
-        );
+        );*/
         $user = User::where('mobile', '=', $this->getInputs()['mobile'])->firstOrFail();
         $user->last_sent_code = 234567;
         $user->is_confirm_sms_enabled = true;
+        $user->is_logged_out = true;
         $user->save();
         $data["user"] = $user;
+        $data["token"] = null;
         $dtp["status"]= 200;
         $dtp["message"]= $this->getDefaultValues()["message"];
         $dtp["showDialog"]= $this->getDefaultValues()["showDialog"];
@@ -352,7 +357,7 @@ class GetUserActionsController extends Controller
         $user->is_logged_out = true;
         $user->save();
         $data["user"] = $user;
-        $dtp["status"]= 200;
+        $dtp["status"]= 403;
         $dtp["message"]= $this->getDefaultValues()["message"];
         $dtp["showDialog"]= $this->getDefaultValues()["showDialog"];
         $dtp["positiveBtn"]= $this->getDefaultValues()["positiveBtn"];
@@ -363,7 +368,7 @@ class GetUserActionsController extends Controller
         $dtp["target"]= self::TARGET;
         $dtp["targetID"]= self::TARGET_ID;
         $data["response"]= $dtp;
-        return response()->json($data, 200);
+        return response()->json($data, 403);
     }
 
     /**

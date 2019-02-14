@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Address;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use App\ShopInfo;
 use Illuminate\Http\Request;
 
 class GetShopDetailsController extends Controller
@@ -55,7 +56,7 @@ class GetShopDetailsController extends Controller
     {
         $this->defaultValues = array(
             "status" => 200,
-            "errorMessage" => "",
+            "message" => "",
             "showDialog" => false,
             "positiveBtn" => "باشه",
             "positiveBtnUrl" => "",
@@ -67,13 +68,13 @@ class GetShopDetailsController extends Controller
 
     public function setMainPageSpecification()
     {
-        $this->mainPageSpecification = App\MainPageSpecification::all()[0];
+        $this->mainPageSpecification = \App\MainPageSpecification::all()[0];
     }
 
     public function setSlide()
     {
         $arrayBanners = array();
-        $slide = App\Slide::where('title', '=', 'main_page_banner')->first();
+        $slide = \App\Slide::where('title', '=', 'main_page_banner')->first();
         foreach ($slide->banners as $slide){
             $arrayBanners[] = $slide->only(['image', 'target', 'targetID']);
         }
@@ -83,7 +84,7 @@ class GetShopDetailsController extends Controller
     public function setCats()
     {
         $arrayCats = array();
-        foreach (App\ParentCategory::all() as $cat){
+        foreach (\App\ParentCategory::all() as $cat){
             $arrayCats[] = $cat->only(['image', 'target', 'targetID']);
         }
         $this->cats = $arrayCats;
@@ -93,7 +94,7 @@ class GetShopDetailsController extends Controller
     {
         $i = 0;
         $arraySections = array();
-        foreach (App\Section::all() as $section){
+        foreach (\App\Section::all() as $section){
             $arraySections[] = $section->only([
                 "title",
                 "type",
@@ -105,7 +106,7 @@ class GetShopDetailsController extends Controller
             ]);
             switch ($section->title) {
                 case "پیشنهاد شگفت انگیز":
-                    foreach(App\Product::where('visibility', '=', 1)->get() as $product){
+                    foreach(\App\Product::where('visibility', '=', 1)->get() as $product){
                         $arraySections[$i]['list']["image"] = $product->image;
                         $arraySections[$i]['list']["title"] = $product->title;
                         $arraySections[$i]['list']["oldprice"] = $product->prices[0]->oldpricetxt;
@@ -116,7 +117,7 @@ class GetShopDetailsController extends Controller
                     $i++;
                     break;
                 case "پرفروش ترین ها":
-                    foreach(App\Product::where('visibility', '=', 1)->orderBy('total_cell_count', 'desc') as $product){
+                    foreach(\App\Product::where('visibility', '=', 1)->orderBy('total_cell_count', 'desc') as $product){
                         $arraySections[$i]['list']["image"] = $product->image;
                         $arraySections[$i]['list']["title"] = $product->title;
                         $arraySections[$i]['list']["oldprice"] = $product->prices[0]->oldpricetxt;
@@ -127,7 +128,7 @@ class GetShopDetailsController extends Controller
                     $i++;
                     break;
                 case "جدید ترین محصولات":
-                    foreach(App\Product::where('visibility', '=', 1)->orderBy('updated_at', 'desc') as $product){
+                    foreach(\App\Product::where('visibility', '=', 1)->orderBy('updated_at', 'desc') as $product){
                         $arraySections[$i]['list']["image"] = $product->image;
                         $arraySections[$i]['list']["title"] = $product->title;
                         $arraySections[$i]['list']["oldprice"] = $product->prices[0]->oldpricetxt;
@@ -237,6 +238,17 @@ class GetShopDetailsController extends Controller
      */
     public function index()
     {
+        $data["logo_splash"]=\App\ShopInfo::first()->logo_splash;
+        $data["logo"]=\App\ShopInfo::first()->logo;
+        $data["title"]=\App\ShopInfo::first()->title;
+        $data["desc"]=\App\ShopInfo::first()->desc;
+        $data["splash_bgcolor"]=\App\ShopInfo::first()->splash_bgcolor;
+        $data["splash_fontcolor"]=\App\ShopInfo::first()->splash_fontcolor;
+        $data["toolbar_bgcolor"]=\App\ShopInfo::first()->toolbar_bgcolor;
+        $data["toolbar_fontcolor"]=\App\ShopInfo::first()->toolbar_fontcolor;
+        $data["show_instagram_button"]=\App\ShopInfo::first()->show_instagram_button;
+        $data["instagram_page_url"]=\App\ShopInfo::first()->instagram_page_url;
+        $data["show_category_button"]=\App\ShopInfo::first()->show_category_button;
         $data["slides"]= $this->getSlide();
         $data["cats"]= $this->getCats();
         $data["section"]= $this->getSections();

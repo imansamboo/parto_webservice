@@ -47,7 +47,7 @@ class GetCatsController extends Controller
     {
         $this->defaultValues = array(
             "status" => 200,
-            "errorMessage" => "",
+            "message" => "",
             "showDialog" => false,
             "positiveBtn" => "باشه",
             "positiveBtnUrl" => "",
@@ -60,7 +60,7 @@ class GetCatsController extends Controller
     public function setSlide()
     {
         $arrayBanners = array();
-        $slide = App\Slide::where('title', '=', 'get_cat_page')->first();
+        $slide = \App\Slide::where('title', '=', 'get_cat_page')->first();
         foreach ($slide->banners as $slide){
             $arrayBanners[] = $slide->only(['image', 'target', 'targetID']);
         }
@@ -70,7 +70,7 @@ class GetCatsController extends Controller
     public function setCats()
     {
         $arrayCats = array();
-        foreach (App\ParentCategory::all() as $cat){
+        foreach (\App\ParentCategory::find($this->getInputs()['ID'])->categories as $cat){
             $arrayCats[] = $cat->only(['image', 'target', 'targetID']);
         }
         $this->cats = $arrayCats;
@@ -79,8 +79,9 @@ class GetCatsController extends Controller
     public function setSections()
     {
         $arraySections = array();
-        foreach (App\Section::all() as $section){
-            $i = 0;
+        $j = -1;
+        foreach (\App\Section::all() as $section){
+            $j++;
             $arraySections[] = $section->only([
                 "title",
                 "type",
@@ -92,35 +93,39 @@ class GetCatsController extends Controller
             ]);
             switch ($section->title) {
                 case "پیشنهاد شگفت انگیز":
+                    unset($arraySections[$j]);
                     break;
                 case "پرفروش ترین ها":
-                    foreach(App\Product::where('visibility', '=', 1)->orderBy('total_cell_count', 'desc') as $product){
-                        $arraySections[$i]['list']["image"] = $product->image;
-                        $arraySections[$i]['list']["title"] = $product->title;
-                        $arraySections[$i]['list']["oldprice"] = $product->prices[0]->oldpricetxt;
-                        $arraySections[$i]['list']["price"] = $product->prices[0]->pricetxt;
-                        $arraySections[$i]['list']["target"] = "webview";
-                        $arraySections[$i]['list']["targetID"] = $product->ID;
+                    $i = 0;
+                    foreach(\App\Product::where('visibility', '=', 1)->orderBy('total_cell_count', 'desc')->get() as $product){
+                        $arraySections[$j]['list'][$i]["image"] = $product->image;
+                        $arraySections[$j]['list'][$i]["title"] = $product->title;
+                        $arraySections[$j]['list'][$i]["oldprice"] = $product->prices[0]->oldpricetxt;
+                        $arraySections[$j]['list'][$i]["price"] = $product->prices[0]->pricetxt;
+                        $arraySections[$j]['list'][$i]["target"] = "webview";
+                        $arraySections[$j]['list'][$i]["targetID"] = $product->ID;
+                        $i++;
                     }
-                    $i++;
+
                     break;
                 case "جدید ترین محصولات":
-                    foreach(App\Product::where('visibility', '=', 1)->orderBy('updated_at', 'desc') as $product){
-                        $arraySections[$i]['list']["image"] = $product->image;
-                        $arraySections[$i]['list']["title"] = $product->title;
-                        $arraySections[$i]['list']["oldprice"] = $product->prices[0]->oldpricetxt;
-                        $arraySections[$i]['list']["price"] = $product->prices[0]->pricetxt;
-                        $arraySections[$i]['list']["target"] = "webview";
-                        $arraySections[$i]['list']["targetID"] = $product->ID;
+                    $i = 0;
+                    foreach(\App\Product::where('visibility', '=', 1)->orderBy('updated_at', 'desc')->get() as $product){
+                        $arraySections[$j]['list'][$i]["image"] = $product->image;
+                        $arraySections[$j]['list'][$i]["title"] = $product->title;
+                        $arraySections[$j]['list'][$i]["oldprice"] = $product->prices[0]->oldpricetxt;
+                        $arraySections[$j]['list'][$i]["price"] = $product->prices[0]->pricetxt;
+                        $arraySections[$j]['list'][$i]["target"] = "webview";
+                        $arraySections[$j]['list'][$i]["targetID"] = $product->ID;
                         $i++;
                     }
                     break;
                 default:
+                    $i = 0;
                     if($section->type == 'fullbanner'){
-                        $arraySections[$i]['list'] = null;
-                        $i++;
+                        $arraySections[$j]['list'] = null;
                     }elseif ($section->type == 'gridbanner'){
-                        $arraySections[$i]['list'] = array(
+                        $arraySections[$j]['list']= array(
                             array(
 
                                 "image" => "https://api.backino.net/red-apple/gridbanner_left.png",
@@ -142,7 +147,7 @@ class GetCatsController extends Controller
 
                             )
                         );
-                        $i++;
+
                     }
             }
         }

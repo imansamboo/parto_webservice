@@ -44,7 +44,7 @@ class GetPagesController extends Controller
     {
         $this->defaultValues = array(
             "status" => 200,
-            "errorMessage" => "",
+            "message" => "",
             "showDialog" => false,
             "positiveBtn" => "باشه",
             "positiveBtnUrl" => "",

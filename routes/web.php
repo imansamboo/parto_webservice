@@ -27,6 +27,11 @@ Route::get('/registerEmail', function () {
     }
 });
 Route::get('/', function () {
+    foreach (\App\Address::all() as $address){
+        $address->fullname = $address->user->fullname;
+        $address->save();
+    }
+
     /*foreach (App\Product::all() as $product){
         $arrayProducts[] = array_merge(
             $product->only(

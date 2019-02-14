@@ -7,6 +7,7 @@ use App\Province;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class GetAddressesController extends Controller
 {
@@ -52,7 +53,7 @@ class GetAddressesController extends Controller
     {
         $this->defaultValues = array(
             "status" => 200,
-            "errorMessage" => "",
+            "message" => "",
             "showDialog" => false,
             "positiveBtn" => "باشه",
             "positiveBtnUrl" => "",
@@ -124,19 +125,24 @@ class GetAddressesController extends Controller
     public function insert($request)
     {
         $address = Address::create(
-            $request->only(
+            array_merge(
+                $request->only(
+                    array(
+                        'city',
+                        'province',
+                        'address',
+                        'postalcode',
+                        'phone',
+                        'mobile',
+                        'areacode',
+                        'selected',
+                        'latitude',
+                        'longitude'
+                    )
+                ),
                 array(
-                    'fullname',
-                    'city',
-                    'province',
-                    'address',
-                    'postalcode',
-                    'phone',
-                    'mobile',
-                    'areacode',
-                    'selected',
-                    'latitude',
-                    'longitude'
+                    'user_ID' => Auth::id(),
+                    'fullname' => Auth::user()->fullname
                 )
             )
         );
@@ -150,24 +156,26 @@ class GetAddressesController extends Controller
     public function edit($request)
     {
         $address = Address::find($this->getInputs()['ID']);
-        $address->update(
-            $request->only(
-                array(
-                    'fullname',
-                    'city',
-                    'province',
-                    'address',
-                    'postalcode',
-                    'phone',
-                    'mobile',
-                    'areacode',
-                    'selected',
-                    'latitude',
-                    'longitude'
+        if ($address->user->id == Auth::id()){
+            $address->update(
+                $request->only(
+                    array(
+                        'fullname',
+                        'city',
+                        'province',
+                        'address',
+                        'postalcode',
+                        'phone',
+                        'mobile',
+                        'areacode',
+                        'selected',
+                        'latitude',
+                        'longitude'
+                    )
                 )
-            )
-        );
-        return response()->json($address, 200);
+            );
+            return response()->json($address, 200);
+        }
     }
 
     /**
@@ -175,8 +183,12 @@ class GetAddressesController extends Controller
      */
     public function delete()
     {
-        Address::destroy($this->getInputs()['ID']);
-        return response()->json(null, 204);
+        $address = Address::findOrFail($this->getInputs()['ID']);
+
+        if($address->user_ID == Auth::user()->id) {
+            Address::destroy($this->getInputs()['ID']);
+            return response()->json(null, 204);
+        }
     }
 
     /**
@@ -186,12 +198,20 @@ class GetAddressesController extends Controller
     {
         Address::where('selected', '=', 1)->update(['selected' => false]);
         $address = Address::find($this->getInputs()['ID']);
-        $address->update(
-            array(
-                'selected' => true
-            )
-        );
-        return response()->json($address, 200);
+        if($address->user_ID == Auth::user()->id){
+            $address->update(
+                array(
+                    'selected' => true
+                )
+            );
+            foreach (Auth::user()->addresses as $disableAdress){
+                if($disableAdress->ID != $this->getInputs()['ID']){
+                    $disableAdress->selected = false;
+                    $disableAdress->save();
+                }
+            }
+            return response()->json($address, 200);
+        }
     }
 
     /**
@@ -199,7 +219,9 @@ class GetAddressesController extends Controller
      */
     public function getList()
     {
-        foreach (Province::all() as $province)
+        $arrayCities = array();
+        $arrayProvuinces = array();
+        foreach (Province::limit(10)->get() as $province)
         {
             foreach ($province->cities as $city){
                 $arrayCities[] = $city->only(["ID", "title"]);
@@ -209,7 +231,8 @@ class GetAddressesController extends Controller
                 ['cities' => $arrayCities]
             );
         }
-        foreach (Address::all() as $address){
+        $arrayAddresses = array();
+        foreach (Address::where('user_ID', '=', Auth::user()->id)->get() as $address){
             $arrayAddresses[] = $address->only(
                 array(
                     "ID",

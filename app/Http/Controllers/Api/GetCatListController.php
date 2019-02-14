@@ -42,7 +42,7 @@ class GetCatListController extends Controller
     {
         $this->defaultValues = array(
             "status" => 200,
-            "errorMessage" => "",
+            "message" => "",
             "showDialog" => false,
             "positiveBtn" => "باشه",
             "positiveBtnUrl" => "",
@@ -55,7 +55,7 @@ class GetCatListController extends Controller
     public function setTabs()
     {
         $arrayTabs = array();
-        foreach (App\Tab::all() as $tab){
+        foreach (\App\Tab::all() as $tab){
             foreach ($tab->categories as $category){
                 $arrayCategories[] = $category->only(['title', 'image', 'target', 'targetID']);
             }

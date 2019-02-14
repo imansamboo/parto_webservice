@@ -37,3 +37,15 @@ Route::post('getProvince', 'Api\\CitiesController@getProvince');
 Route::get('addresses/{id}/getProvince', 'Api\\AddressesController@getProvince');
 Route::post('login', 'Auth\\LoginController@login');
 Route::post('provinces', 'Api\\ProvincesController@index');
+
+
+
+Route::post('get-shop-detail', 'Api\\GetShopDetailsController@index');
+Route::post('get-cats-list', 'Api\\GetCatListController@index');
+Route::post('get-cat', 'Api\\GetCatsController@index');
+Route::post('get-address', 'Api\\GetAddressesController@index')->middleware('check_token');
+Route::post('get-product-list', 'Api\\GetProductListsController@index');
+Route::post('get-product', 'Api\\GetProductsController@index');
+Route::post('get-page', 'Api\\GetPagesController@index');
+Route::post('get-user-action', 'Api\\GetUserActionsController@index');
+Route::post('get-user-action', 'Api\\GetUserActionsController@index');

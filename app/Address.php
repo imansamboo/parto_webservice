@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Address extends Model
 {
-    protected $fillable = ['fullname', 'city', 'province', 'address', 'postalcode', 'phone', 'mobile', 'areacode', 'selected', 'latitude', 'longitude'];
+    protected $fillable = ['fullname', 'city', 'province', 'address', 'postalcode', 'phone', 'mobile', 'areacode', 'selected', 'latitude', 'longitude', 'user_ID'];
     public $timestamps = false;
     protected $primaryKey = 'ID';
 
@@ -17,6 +17,15 @@ class Address extends Model
     {
         return $this->belongsTo('App\City', 'city', 'title');
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function user()
+    {
+        return $this->belongsTo('App\User', 'user_ID', 'ID');
+    }
+
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
